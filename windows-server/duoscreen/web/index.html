@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="DSS Display">
+  <title>DSS — iPad Secondary Display</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #000;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    #container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #050505;
+    }
+    canvas {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      cursor: crosshair;
+    }
+    #hud {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      display: flex;
+      gap: 8px;
+      pointer-events: none;
+      z-index: 100;
+      transition: opacity 0.3s;
+    }
+    .badge {
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #00e676;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    #fullscreen-btn {
+      position: absolute;
+      bottom: 16px;
+      right: 16px;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      z-index: 100;
+      transition: opacity 0.3s;
+    }
+    #fullscreen-btn:active {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    #status-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: rgba(5, 5, 5, 0.9);
+      color: #fff;
+      z-index: 200;
+      gap: 16px;
+    }
+    .spinner {
+      width: 44px;
+      height: 44px;
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      border-top-color: #00e5ff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <canvas id="screen"></canvas>
+    
+    <div id="hud">
+      <div id="fps-badge" class="badge">0 FPS</div>
+      <div id="latency-badge" class="badge" style="color: #ffea00;">-- ms</div>
+    </div>
+
+    <button id="fullscreen-btn">⛶ Fullscreen</button>
+
+    <div id="status-overlay">
+      <div class="spinner"></div>
+      <h2 style="font-size: 20px; font-weight: 600;">Connecting to DSS Server...</h2>
+      <p style="color: #888; font-size: 13px;">Make sure your Windows laptop has DSS running.</p>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('screen');
+    const ctx = canvas.getContext('2d');
+    const statusOverlay = document.getElementById('status-overlay');
+    const fpsBadge = document.getElementById('fps-badge');
+    const latencyBadge = document.getElementById('latency-badge');
+    const fullscreenBtn = document.getElementById('fullscreen-btn');
+
+    let ws = null;
+    let frameCount = 0;
+    let lastFpsTime = performance.now();
+    let currentFps = 0;
+
+    // Fullscreen toggle
+    fullscreenBtn.addEventListener('click', () => {
+      const elem = document.documentElement;
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        if (elem.requestFullscreen) {
+          elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) {
+          elem.webkitRequestFullscreen();
+        }
+        fullscreenBtn.textContent = '✕ Exit Fullscreen';
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
+        fullscreenBtn.textContent = '⛶ Fullscreen';
+      }
+    });
+
+    // Auto-hide buttons after 4s of inactivity
+    let hideTimer = null;
+    function resetHideTimer() {
+      fullscreenBtn.style.opacity = '1';
+      document.getElementById('hud').style.opacity = '1';
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(() => {
+        fullscreenBtn.style.opacity = '0.15';
+        document.getElementById('hud').style.opacity = '0.2';
+      }, 4000);
+    }
+    window.addEventListener('touchstart', resetHideTimer);
+    window.addEventListener('mousemove', resetHideTimer);
+
+    function connect() {
+      const loc = window.location;
+      const wsProto = loc.protocol === 'https:' ? 'wss:' : 'ws:';
+      const httpPort = parseInt(loc.port || '8080', 10);
+      const wsPort = httpPort + 1;
+      const wsUrl = `${wsProto}//${loc.hostname}:${wsPort}/ws`;
+
+      ws = new WebSocket(wsUrl);
+      ws.binaryType = 'arraybuffer';
+
+      ws.onopen = () => {
+        statusOverlay.classList.add('hidden');
+        resetHideTimer();
+      };
+
+      ws.onmessage = async (event) => {
+        if (typeof event.data === 'string') {
+          // JSON message (e.g. config)
+          try {
+            const msg = JSON.parse(event.data);
+            if (msg.type === 'config') {
+              canvas.width = msg.width;
+              canvas.height = msg.height;
+            }
+          } catch(e) {}
+          return;
+        }
+
+        // Binary frame: 8-byte timestamp (uint64 little-endian) + JPEG bytes
+        const data = event.data;
+        if (data.byteLength < 8) return;
+
+        const view = new DataView(data);
+        const sendTimestamp = Number(view.getBigUint64(0, true));
+        const now = Date.now();
+        const latency = Math.max(0, now - sendTimestamp);
+
+        const jpegBlob = new Blob([data.slice(8)], { type: 'image/jpeg' });
+        try {
+          const bitmap = await createImageBitmap(jpegBlob);
+          if (canvas.width !== bitmap.width || canvas.height !== bitmap.height) {
+            canvas.width = bitmap.width;
+            canvas.height = bitmap.height;
+          }
+          ctx.drawImage(bitmap, 0, 0);
+          bitmap.close();
+
+          frameCount++;
+          const t = performance.now();
+          if (t - lastFpsTime >= 1000) {
+            currentFps = Math.round((frameCount * 1000) / (t - lastFpsTime));
+            frameCount = 0;
+            lastFpsTime = t;
+            fpsBadge.textContent = `${currentFps} FPS`;
+            latencyBadge.textContent = `${latency} ms`;
+          }
+        } catch (err) {
+          console.error("Frame decode error", err);
+        }
+      };
+
+      ws.onclose = () => {
+        statusOverlay.classList.remove('hidden');
+        setTimeout(connect, 2000);
+      };
+
+      ws.onerror = () => {
+        ws.close();
+      };
+    }
+
+    // Touch and Mouse Handling -> sends normalized coords to Windows
+    function sendInputEvent(clientX, clientY, action) {
+      if (!ws || ws.readyState !== WebSocket.OPEN) return;
+
+      const rect = canvas.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
+
+      const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+      const y = Math.max(0, Math.min(1, (clientY - rect.top) / rect.height));
+
+      // action: 0 = down, 1 = move, 2 = up
+      ws.send(JSON.stringify({ type: 'input', x: x, y: y, action: action }));
+    }
+
+    // Touch events for iPad
+    canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      const t = e.touches[0];
+      if (t) sendInputEvent(t.clientX, t.clientY, 0);
+    }, { passive: false });
+
+    canvas.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      const t = e.touches[0];
+      if (t) sendInputEvent(t.clientX, t.clientY, 1);
+    }, { passive: false });
+
+    canvas.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      const t = e.changedTouches[0];
+      if (t) sendInputEvent(t.clientX, t.clientY, 2);
+    }, { passive: false });
+
+    // Mouse events for desktop browsers
+    let isMouseDown = false;
+    canvas.addEventListener('mousedown', (e) => {
+      isMouseDown = true;
+      sendInputEvent(e.clientX, e.clientY, 0);
+    });
+    canvas.addEventListener('mousemove', (e) => {
+      if (isMouseDown) sendInputEvent(e.clientX, e.clientY, 1);
+    });
+    window.addEventListener('mouseup', (e) => {
+      if (isMouseDown) {
+        isMouseDown = false;
+        sendInputEvent(e.clientX, e.clientY, 2);
+      }
+    });
+
+    connect();
+  </script>
+</body>
+</html>

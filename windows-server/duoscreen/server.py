@@ -134,44 +134,57 @@ class DuoScreenServer:
         capture: ScreenCapture,
         encoder: FrameEncoder,
         config: DuoScreenConfig,
+        web_server: Optional[object] = None,
     ) -> None:
-        """Capture → encode → send loop, runs at *config.fps*."""
+        """Capture → encode → send loop, runs at *config.fps* for both TCP and Web clients."""
         interval = 1.0 / config.fps
+        sent_tcp_config = False
 
         while self._running:
-            # Wait for a client
-            await self._connected.wait()
+            has_tcp = self._connected.is_set() and self._writer is not None
+            has_web = web_server is not None and len(getattr(web_server, "clients", [])) > 0
 
-            # Send config packet first
-            try:
-                cfg_pkt = build_config_packet(config.width, config.height, config.fps)
-                self._writer.write(cfg_pkt)  # type: ignore[union-attr]
-                await self._writer.drain()  # type: ignore[union-attr]
-            except Exception:  # noqa: BLE001
+            if not has_tcp and not has_web:
+                sent_tcp_config = False
+                await asyncio.sleep(0.05)
                 continue
 
-            print("[DuoScreen] Streaming started")
+            # Send config packet to native TCP client once upon connecting
+            if has_tcp and not sent_tcp_config:
+                try:
+                    cfg_pkt = build_config_packet(config.width, config.height, config.fps)
+                    self._writer.write(cfg_pkt)  # type: ignore[union-attr]
+                    await self._writer.drain()  # type: ignore[union-attr]
+                    sent_tcp_config = True
+                except Exception:
+                    pass
 
-            while self._running and self._connected.is_set():
-                t0 = time.monotonic()
+            t0 = time.monotonic()
+            frame = capture.get_frame()
+            if frame is not None:
+                jpeg = encoder.encode_mjpeg(frame, quality=config.jpeg_quality)
+                if jpeg is not None:
+                    ts_ms = int(time.time() * 1000)
 
-                frame = capture.get_frame()
-                if frame is not None:
-                    jpeg = encoder.encode_mjpeg(frame, quality=config.jpeg_quality)
-                    if jpeg is not None:
-                        ts_ms = int(time.time() * 1000)
+                    # 1. Send to native TCP client if connected
+                    if has_tcp:
                         packet = build_video_packet(jpeg, ts_ms)
                         try:
                             self._writer.write(packet)  # type: ignore[union-attr]
                             await self._writer.drain()  # type: ignore[union-attr]
                         except (ConnectionError, OSError):
-                            log.info("Write failed — client likely disconnected")
+                            log.info("TCP write failed — client likely disconnected")
                             self._connected.clear()
-                            break
+                            sent_tcp_config = False
 
-                elapsed = time.monotonic() - t0
-                sleep_for = interval - elapsed
-                if sleep_for > 0:
-                    await asyncio.sleep(sleep_for)
+                    # 2. Broadcast to iPad Safari Web clients
+                    if has_web and web_server is not None:
+                        try:
+                            await web_server.broadcast_frame(jpeg, ts_ms)  # type: ignore[union-attr]
+                        except Exception as e:
+                            log.debug("Web broadcast error: %s", e)
 
-            print("[DuoScreen] Streaming stopped")
+            elapsed = time.monotonic() - t0
+            sleep_for = interval - elapsed
+            if sleep_for > 0:
+                await asyncio.sleep(sleep_for)
