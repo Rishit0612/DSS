@@ -92,7 +92,7 @@ async def _run(cfg: DuoScreenConfig) -> None:
     injector = InputInjector()
     server = DuoScreenServer()
     tunnel = USBTunnel()
-    web_server = WebStreamingServer(host="0.0.0.0", port=8080)
+    web_server = WebStreamingServer(host="0.0.0.0", port=5000)
 
     # --- USB tunnel (best-effort) ---
     device = tunnel.find_device()
@@ -130,7 +130,7 @@ async def _run(cfg: DuoScreenConfig) -> None:
     print(f"  TCP Native Port : {cfg.server_port}")
     print("━" * 52)
     print("  📱 NO MAC NEEDED! OPEN THIS ON YOUR IPAD SAFARI:")
-    print(f"     👉 http://{local_ip}:8080")
+    print(f"     👉 http://{local_ip}:5000")
     print("  (Tip: Tap 'Share' -> 'Add to Home Screen' for Fullscreen)")
     print("━" * 52)
     print(f"  Native TCP Socket listening on {cfg.host}:{cfg.server_port}\n")

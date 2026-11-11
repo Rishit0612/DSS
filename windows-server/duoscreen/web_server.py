@@ -1,13 +1,14 @@
-"""HTTP and WebSocket server for iPad Safari and web clients."""
+"""Robust HTTP and WebSocket server for iPad Safari and web clients."""
 
 from __future__ import annotations
 
 import asyncio
+import http.server
 import json
 import logging
 import os
 import struct
-import time
+import threading
 from typing import Callable, Optional, Set
 
 from websockets.asyncio.server import ServerConnection, serve
@@ -18,24 +19,50 @@ HTML_PATH = os.path.join(os.path.dirname(__file__), "web", "index.html")
 
 
 class WebStreamingServer:
-    """Serves the web client HTML and streams frames via WebSockets."""
+    """Serves index.html via ThreadingHTTPServer and streams frames via WebSockets."""
 
-    def __init__(self, host: str = "0.0.0.0", port: int = 8080) -> None:
+    def __init__(self, host: str = "0.0.0.0", port: int = 5000) -> None:
         self.host = host
         self.port = port
+        self.ws_port = port + 1
         self.clients: Set[ServerConnection] = set()
         self._input_callback: Optional[Callable[[dict], None]] = None
-        self._running = False
-        self._html_content = b""
-
-        if os.path.exists(HTML_PATH):
-            with open(HTML_PATH, "rb") as f:
-                self._html_content = f.read()
+        self._httpd: Optional[http.server.ThreadingHTTPServer] = None
+        self._http_thread: Optional[threading.Thread] = None
+        self._ws_server = None
 
     def set_input_callback(self, cb: Callable[[dict], None]) -> None:
         self._input_callback = cb
 
-    async def _handle_http_or_ws(self, connection: ServerConnection) -> None:
+    def _start_http_server(self) -> None:
+        server_self = self
+
+        class RobustHandler(http.server.BaseHTTPRequestHandler):
+            def do_GET(self) -> None:  # noqa: N802
+                if os.path.exists(HTML_PATH):
+                    with open(HTML_PATH, "rb") as f:
+                        body = f.read()
+                    self.send_response(200)
+                    self.send_header("Content-Type", "text/html; charset=utf-8")
+                    self.send_header("Content-Length", str(len(body)))
+                    self.send_header("Access-Control-Allow-Origin", "*")
+                    self.end_headers()
+                    self.wfile.write(body)
+                else:
+                    self.send_error(404, "index.html not found")
+
+            def log_message(self, format: str, *args) -> None:  # noqa: A002
+                pass
+
+        try:
+            http.server.ThreadingHTTPServer.allow_reuse_address = True
+            self._httpd = http.server.ThreadingHTTPServer((self.host, self.port), RobustHandler)
+            log.info("HTTP Server listening on http://%s:%d", self.host, self.port)
+            self._httpd.serve_forever()
+        except Exception as exc:
+            log.error("Failed to start HTTP server on port %d: %s", self.port, exc)
+
+    async def _handle_ws(self, connection: ServerConnection) -> None:
         """Handle incoming WebSocket connections from iPad / browsers."""
         self.clients.add(connection)
         log.info("Web client connected: %s (Total: %d)", connection.remote_address, len(self.clients))
@@ -64,11 +91,9 @@ class WebStreamingServer:
         if not self.clients:
             return
 
-        # Header: 8 bytes timestamp (uint64 LE) + JPEG data
         header = struct.pack("<Q", timestamp_ms)
         payload = header + jpeg_bytes
 
-        # Send to all connected clients concurrently
         disconnected = set()
         for client in self.clients:
             try:
@@ -79,54 +104,25 @@ class WebStreamingServer:
         for client in disconnected:
             self.clients.discard(client)
 
-    async def _handle_http_request(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter) -> None:
-        """Simple HTTP server handler for serving index.html."""
-        try:
-            req_line = await reader.readline()
-            if not req_line:
-                writer.close()
-                return
+    async def start(self) -> None:
+        """Start both HTTP thread and WebSocket async server."""
+        self._http_thread = threading.Thread(target=self._start_http_server, daemon=True)
+        self._http_thread.start()
 
-            # Read remaining headers
-            while True:
-                line = await reader.readline()
-                if line in (b"\r\n", b"\n", b""):
-                    break
+        self._ws_server = await serve(self._handle_ws, self.host, self.ws_port)
+        log.info("WebSocket Server listening on ws://%s:%d", self.host, self.ws_port)
 
-            # Serve index.html
-            response = (
-                b"HTTP/1.1 200 OK\r\n"
-                b"Content-Type: text/html; charset=utf-8\r\n"
-                b"Content-Length: " + str(len(self._html_content)).encode() + b"\r\n"
-                b"Connection: close\r\n\r\n" + self._html_content
-            )
-            writer.write(response)
-            await writer.drain()
-        except Exception:
-            pass
-        finally:
+        await self._ws_server.serve_forever()
+
+    async def stop(self) -> None:
+        if self._httpd:
             try:
-                writer.close()
-                await writer.wait_closed()
+                self._httpd.shutdown()
             except Exception:
                 pass
-
-    async def start(self) -> None:
-        """Start HTTP server on self.port and WebSocket server on self.port (shared or distinct)."""
-        self._running = True
-
-        # HTTP Server on self.port
-        http_server = await asyncio.start_server(self._handle_http_request, self.host, self.port)
-        
-        # WebSocket Server on self.port + 1 (e.g., 8081)
-        ws_port = self.port + 1
-        ws_server = await serve(self._handle_http_or_ws, self.host, ws_port)
-
-        # Update index.html to point to ws_port dynamically
-        log.info("Web Server listening on http://%s:%d (WebSocket on :%d)", self.host, self.port, ws_port)
-        print(f"\n[🌐 Web Client Ready] Open on your iPad Safari: http://<laptop-ip>:{self.port}")
-
-        await asyncio.gather(
-            http_server.serve_forever(),
-            ws_server.serve_forever(),
-        )
+        if self._ws_server:
+            try:
+                self._ws_server.close()
+                await self._ws_server.wait_closed()
+            except Exception:
+                pass

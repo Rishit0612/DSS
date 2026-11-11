@@ -131,7 +131,7 @@ class DSSApp:
 
         self.ip_label = tk.Label(
             info_card,
-            text=f"iPad App / Browser URL: http://{self.local_ip}:8080",
+            text=f"iPad App / Browser URL: http://{self.local_ip}:5000",
             font=("Segoe UI", 10, "bold"),
             fg="#38bdf8",
             bg="#1e293b"
@@ -218,7 +218,7 @@ class DSSApp:
         injector = InputInjector()
         server = DuoScreenServer()
         tunnel = USBTunnel()
-        web_server = WebStreamingServer(host="0.0.0.0", port=8080)
+        web_server = WebStreamingServer(host="0.0.0.0", port=5000)
 
         # Best-effort USB tunnel
         device = tunnel.find_device()
@@ -284,3 +284,4 @@ class DSSApp:
 if __name__ == "__main__":
     app = DSSApp()
     app.run()
+
