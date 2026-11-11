@@ -1,8 +1,8 @@
-# 🖥️📱 DuoScreen
+# 🖥️📱 DSS (Dual Screening Studio)
 
 > **Turn your iPad into a wired secondary display for your Windows laptop.**
 
-DuoScreen streams your Windows desktop to an iPad over USB, turning it into a true extended display you can drag windows to — like Apple's Sidecar, but for Windows.
+DSS (Dual Screening Studio) streams your Windows desktop to an iPad over USB, turning it into a true extended display you can drag windows to — like Apple's Sidecar, but for Windows.
 
 ## ✨ Features
 
