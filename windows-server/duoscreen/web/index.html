@@ -175,9 +175,7 @@
     function connect() {
       const loc = window.location;
       const wsProto = loc.protocol === 'https:' ? 'wss:' : 'ws:';
-      const httpPort = parseInt(loc.port || '5000', 10);
-      const wsPort = httpPort + 1;
-      const wsUrl = `${wsProto}//${loc.hostname}:${wsPort}/ws`;
+      const wsUrl = `${wsProto}//${loc.hostname}:5001/ws`;
 
       ws = new WebSocket(wsUrl);
       ws.binaryType = 'arraybuffer';

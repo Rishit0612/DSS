@@ -131,16 +131,17 @@ class DSSApp:
 
         self.ip_label = tk.Label(
             info_card,
-            text=f"iPad App / Browser URL: http://{self.local_ip}:5000",
+            text=f"iPad Safari URL: http://{self.local_ip}:5000\nOr simply: http://{self.local_ip}",
             font=("Segoe UI", 10, "bold"),
             fg="#38bdf8",
-            bg="#1e293b"
+            bg="#1e293b",
+            justify=tk.LEFT
         )
         self.ip_label.pack(anchor="w", padx=16, pady=2)
 
         tip_label = tk.Label(
             info_card,
-            text="• 1-Time Setup: iPad Safari me ye link kholkar 'Add to Home Screen' karein.\n• Uske baad bas iPad par DSS icon dabayein aur screen on ho jayegi!",
+            text="⚠️ IMPORTANT: In Safari, type http:// (NOT https://)\n• 1-Time Setup: Safari me link kholkar 'Add to Home Screen' karein.\n• Uske baad bas iPad par DSS icon dabayein aur screen on ho jayegi!",
             font=("Segoe UI", 9),
             fg="#94a3b8",
             bg="#1e293b",

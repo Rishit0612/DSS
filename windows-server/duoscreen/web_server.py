@@ -58,6 +58,15 @@ class WebStreamingServer:
             http.server.ThreadingHTTPServer.allow_reuse_address = True
             self._httpd = http.server.ThreadingHTTPServer((self.host, self.port), RobustHandler)
             log.info("HTTP Server listening on http://%s:%d", self.host, self.port)
+
+            # Also try binding port 80 (standard HTTP without port number)
+            try:
+                httpd_80 = http.server.ThreadingHTTPServer((self.host, 80), RobustHandler)
+                threading.Thread(target=httpd_80.serve_forever, daemon=True).start()
+                log.info("HTTP Server also listening on standard port 80")
+            except Exception:
+                pass
+
             self._httpd.serve_forever()
         except Exception as exc:
             log.error("Failed to start HTTP server on port %d: %s", self.port, exc)
