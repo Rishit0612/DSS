@@ -1,0 +1,327 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A1000001 /* DuoScreenApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000001 /* DuoScreenApp.swift */; };
+		A1000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000002 /* ContentView.swift */; };
+		A1000003 /* Protocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000003 /* Protocol.swift */; };
+		A1000004 /* ScreenClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000004 /* ScreenClient.swift */; };
+		A1000005 /* ScreenRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000005 /* ScreenRenderer.swift */; };
+		A1000006 /* FrameDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000006 /* FrameDecoder.swift */; };
+		A1000007 /* TouchHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000007 /* TouchHandler.swift */; };
+		A1000008 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000008 /* SettingsView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		B1000001 /* DuoScreenApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuoScreenApp.swift; sourceTree = "<group>"; };
+		B1000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		B1000003 /* Protocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Protocol.swift; sourceTree = "<group>"; };
+		B1000004 /* ScreenClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenClient.swift; sourceTree = "<group>"; };
+		B1000005 /* ScreenRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenRenderer.swift; sourceTree = "<group>"; };
+		B1000006 /* FrameDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameDecoder.swift; sourceTree = "<group>"; };
+		B1000007 /* TouchHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TouchHandler.swift; sourceTree = "<group>"; };
+		B1000008 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		B1000009 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C1000001 /* DuoScreen.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DuoScreen.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D1000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		E1000001 /* = DuoScreen project root */ = {
+			isa = PBXGroup;
+			children = (
+				E1000002 /* DuoScreen */,
+				E1000009 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		E1000002 /* DuoScreen */ = {
+			isa = PBXGroup;
+			children = (
+				E1000003 /* App */,
+				E1000004 /* Network */,
+				E1000005 /* Rendering */,
+				E1000006 /* Input */,
+				E1000007 /* Settings */,
+				B1000009 /* Info.plist */,
+			);
+			path = DuoScreen;
+			sourceTree = "<group>";
+		};
+		E1000003 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				B1000001 /* DuoScreenApp.swift */,
+				B1000002 /* ContentView.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		E1000004 /* Network */ = {
+			isa = PBXGroup;
+			children = (
+				B1000003 /* Protocol.swift */,
+				B1000004 /* ScreenClient.swift */,
+			);
+			path = Network;
+			sourceTree = "<group>";
+		};
+		E1000005 /* Rendering */ = {
+			isa = PBXGroup;
+			children = (
+				B1000005 /* ScreenRenderer.swift */,
+				B1000006 /* FrameDecoder.swift */,
+			);
+			path = Rendering;
+			sourceTree = "<group>";
+		};
+		E1000006 /* Input */ = {
+			isa = PBXGroup;
+			children = (
+				B1000007 /* TouchHandler.swift */,
+			);
+			path = Input;
+			sourceTree = "<group>";
+		};
+		E1000007 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				B1000008 /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		E1000009 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				C1000001 /* DuoScreen.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		F1000001 /* DuoScreen */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = G1000003 /* Build configuration list for PBXNativeTarget "DuoScreen" */;
+			buildPhases = (
+				F1000002 /* Sources */,
+				D1000001 /* Frameworks */,
+				F1000003 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DuoScreen;
+			productName = DuoScreen;
+			productReference = C1000001 /* DuoScreen.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		F1000010 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					F1000001 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = G1000001 /* Build configuration list for PBXProject "DuoScreen" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = E1000001;
+			productRefGroup = E1000009 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				F1000001 /* DuoScreen */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		F1000003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		F1000002 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1000001 /* DuoScreenApp.swift in Sources */,
+				A1000002 /* ContentView.swift in Sources */,
+				A1000003 /* Protocol.swift in Sources */,
+				A1000004 /* ScreenClient.swift in Sources */,
+				A1000005 /* ScreenRenderer.swift in Sources */,
+				A1000006 /* FrameDecoder.swift in Sources */,
+				A1000007 /* TouchHandler.swift in Sources */,
+				A1000008 /* SettingsView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		G1000010 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		G1000011 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		G1000020 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = DuoScreen/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.duoscreen.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 2;
+			};
+			name = Debug;
+		};
+		G1000021 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = DuoScreen/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.duoscreen.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 2;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		G1000001 /* Build configuration list for PBXProject "DuoScreen" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				G1000010 /* Debug */,
+				G1000011 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		G1000003 /* Build configuration list for PBXNativeTarget "DuoScreen" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				G1000020 /* Debug */,
+				G1000021 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+	};
+	rootObject = F1000010 /* Project object */;
+}
