@@ -141,9 +141,10 @@ async def _run(cfg: DuoScreenConfig) -> None:
     web_task = asyncio.create_task(web_server.start())
 
     try:
-        await asyncio.gather(server_task, stream_task, web_task)
+        await asyncio.gather(server_task, stream_task, web_task, return_exceptions=True)
     finally:
         await server.stop()
+        await web_server.stop()
         capture.stop()
         tunnel.stop()
 

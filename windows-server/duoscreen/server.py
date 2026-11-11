@@ -49,9 +49,15 @@ class DuoScreenServer:
     ) -> None:
         """Start the server and begin streaming once a client connects."""
         self._running = True
-        self._server = await asyncio.start_server(
-            self._handle_client, host, port
-        )
+        try:
+            self._server = await asyncio.start_server(
+                self._handle_client, host, port
+            )
+        except OSError as exc:
+            log.warning("Native TCP server on %s:%d could not bind (%s). Web stream on port 5000 is still active.", host, port, exc)
+            print(f"[!] Native TCP port {port} is busy ({exc}). Web client on port 5000 is unaffected.")
+            return
+
         addrs = ", ".join(str(s.getsockname()) for s in self._server.sockets)
         print(f"[DuoScreen] Listening on {addrs}")
         log.info("Server listening on %s", addrs)

@@ -250,11 +250,17 @@ class DSSApp:
         web_task = self.loop.create_task(web_server.start())
 
         try:
-            self.loop.run_until_complete(asyncio.gather(server_task, stream_task, web_task))
-        except asyncio.CancelledError:
+            self.loop.run_until_complete(asyncio.gather(server_task, stream_task, web_task, return_exceptions=True))
+        except (asyncio.CancelledError, KeyboardInterrupt):
             pass
+        except Exception as e:
+            print(f"[!] Server thread notice: {e}")
         finally:
-            self.loop.run_until_complete(server.stop())
+            try:
+                self.loop.run_until_complete(server.stop())
+                self.loop.run_until_complete(web_server.stop())
+            except Exception:
+                pass
             capture.stop()
             tunnel.stop()
 
